@@ -361,7 +361,6 @@
 </div>
 
 <script>
-    // Coordinate nodes aligned nicely within our provincial blocks
     const coordinateGrid = [
         { id: 1, name: "Fort McMurray Grid (Boreal)", lat: "56.7° N", lng: "111.3° W", cx: 232, cy: 235, sensitivity: 1.8 },
         { id: 2, name: "Peace River Forest Basin", lat: "56.2° N", lng: "117.3° W", cx: 215, cy: 265, sensitivity: 1.6 },
@@ -390,16 +389,22 @@
     function getStandardValues(week) {
         const isSummer = week >= 20 && week <= 35;
         const isWinter = week < 10 || week > 44;
-        return {
-            temp: isSummer ? 28 : (isWinter ? -10 : 12),
-            wind: isSummer ? 18 : 25,
-            moisture: isSummer ? 0.25 : (isWinter ? 0.80 : 0.55)
-        };
+        let standardTemp = isSummer ? 28 : (isWinter ? -10 : 12);
+        let standardWind = isSummer ? 18 : 25;
+        let standardMoisture = isSummer ? 0.25 : (isWinter ? 0.80 : 0.55);
+        return { temp: standardTemp, wind: standardWind, moisture: standardMoisture };
     }
 
     function onTimeSliderChange() {
         const week = parseInt(document.getElementById('time-slider').value);
         document.getElementById('time-val').innerText = `Week ${week} (${getMonthName(week)})`;
+        
+        // Automatically update sliders to match seasonal standards for this week!
+        const standard = getStandardValues(week);
+        document.getElementById('temp-slider').value = standard.temp;
+        document.getElementById('wind-slider').value = standard.wind;
+        document.getElementById('moisture-slider').value = standard.moisture;
+
         updateSimulation();
     }
 
@@ -453,7 +458,6 @@
         coordinateGrid.forEach(pt => {
             const risk = calculateRisk(temp, wind, moisture, week, pt.sensitivity);
 
-            // Outer glowing thermal halo
             const halo = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             halo.setAttribute('cx', pt.cx);
             halo.setAttribute('cy', pt.cy);
@@ -461,7 +465,6 @@
             halo.setAttribute('fill', risk.haloColor);
             halo.setAttribute('class', 'hotspot-halo');
 
-            // Inner coordinate node
             const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             circle.setAttribute('cx', pt.cx);
             circle.setAttribute('cy', pt.cy);
@@ -471,7 +474,6 @@
             circle.setAttribute('stroke-width', '1.5');
             circle.setAttribute('class', 'hotspot');
 
-            // Tooltip events
             circle.addEventListener('mousemove', (e) => {
                 const tooltip = document.getElementById('map-tooltip');
                 tooltip.style.display = 'block';
