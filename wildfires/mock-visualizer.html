@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wildfire Predictor - Team Demo Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-green: #22c55e;
+            --accent-yellow: #eab308;
+            --accent-red: #ef4444;
+            --primary: #3b82f6;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+            color: #60a5fa;
+        }
+
+        header p {
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 8px;
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .value-display {
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        /* Heatmap Grid */
+        .heatmap-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .grid-cell {
+            background-color: #334155;
+            border-radius: 8px;
+            padding: 14px;
+            text-align: center;
+            transition: transform 0.2s, background-color 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .grid-cell:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .cell-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .cell-risk {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .cell-frp {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Risk level color modifiers */
+        .risk-low { background-color: rgba(34, 197, 94, 0.15); color: var(--accent-green); border-color: rgba(34, 197, 94, 0.3); }
+        .risk-mod { background-color: rgba(234, 179, 8, 0.15); color: var(--accent-yellow); border-color: rgba(234, 179, 8, 0.3); }
+        .risk-high { background-color: rgba(239, 68, 68, 0.2); color: var(--accent-red); border-color: rgba(239, 68, 68, 0.4); }
+
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            text-align: center;
+        }
+
+        .metric-box {
+            background: #0f172a;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .metric-box span {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .metric-box strong {
+            font-size: 1.1rem;
+            color: #60a5fa;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Canadian Wildfire Risk Visualizer (Mockup)</h1>
+        <p>Interactive prototype demonstrating NASA FIRMS + POWER machine learning simulation</p>
+    </header>
+
+    <div class="dashboard-grid">
+        <!-- Controls Column -->
+        <div>
+            <div class="card">
+                <h2>Condition Scalling</h2>
+                
+                <div class="control-group">
+                    <label><span>Temperature (°C)</span> <span id="temp-val" class="value-display">24°C</span></label>
+                    <input type="range" id="temp-slider" min="10" max="42" value="24" oninput="updateSimulation()">
+                </div>
+
+                <div class="control-group">
+                    <label><span>Wind Speed (km/h)</span> <span id="wind-val" class="value-display">15 km/h</span></label>
+                    <input type="range" id="wind-slider" min="0" max="60" value="15" oninput="updateSimulation()">
+                </div>
+
+                <div class="control-group">
+                    <label><span>Soil Moisture Index</span> <span id="moisture-val" class="value-display">0.45</span></label>
+                    <input type="range" id="moisture-slider" min="0.05" max="0.95" step="0.05" value="0.45" oninput="updateSimulation()">
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Time Scaling</h2>
+                <div class="control-group">
+                    <label><span>Timeline Step</span> <span id="time-val" class="value-display">Week 24 (Peak Summer)</span></label>
+                    <input type="range" id="time-slider" min="1" max="52" value="24" oninput="updateSimulation()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Display Column -->
+        <div>
+            <div class="card">
+                <h2>Model Performance Summary (Ch 3 & 7 Metrics)</h2>
+                <div class="metrics-row">
+                    <div class="metric-box">
+                        <span>Accuracy</span>
+                        <strong>92.4%</strong>
+                    </div>
+                    <div class="metric-box">
+                        <span>Precision</span>
+                        <strong>88.1%</strong>
+                    </div>
+                    <div class="metric-box">
+                        <span>F1-Score</span>
+                        <strong>86.5%</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Spatial Heatmap Grid (Canadian Regional Zones)</h2>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0; margin-bottom: 16px;">
+                    Simulated model output across eco-zones based on active sliders.
+                </p>
+                <div class="heatmap-container" id="heatmap-grid">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const regions = [
+        "BC - Interior", "BC - Coast", "Alberta - North", "Alberta - South", 
+        "Saskatchewan", "Manitoba", "Ontario - NW", "Ontario - Central", 
+        "Quebec - North", "Quebec - South", "Maritimes", "Yukon / NWT"
+    ];
+
+    function updateSimulation() {
+        const temp = parseInt(document.getElementById('temp-slider').value);
+        const wind = parseInt(document.getElementById('wind-slider').value);
+        const moisture = parseFloat(document.getElementById('moisture-slider').value);
+        const week = parseInt(document.getElementById('time-slider').value);
+
+        // Update text labels
+        document.getElementById('temp-val').innerText = temp + '°C';
+        document.getElementById('wind-val').innerText = wind + ' km/h';
+        document.getElementById('moisture-val').innerText = moisture.toFixed(2);
+        document.getElementById('time-val').innerText = `Week ${week} (approx. ${getMonthName(week)})`;
+
+        // Re-render heatmap based on math logic reacting to sliders
+        renderHeatmap(temp, wind, moisture, week);
+    }
+
+    function getMonthName(week) {
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        return months[Math.floor((week - 1) / 4.3) % 12];
+    }
+
+    function renderHeatmap(temp, wind, moisture, week) {
+        const gridContainer = document.getElementById('heatmap-grid');
+        gridContainer.innerHTML = '';
+
+        regions.forEach((region, index) => {
+            // Formula to simulate model risk score based on sliders & regional seed
+            let riskScore = (temp * 1.5) + (wind * 1.2) - (moisture * 40);
+            
+            // Add seasonal weighting (higher in summer weeks 20-35)
+            let seasonalFactor = Math.sin((week / 52) * 2 * Math.PI) * 15;
+            riskScore += seasonalFactor + (index % 3) * 5; // slight regional variation
+
+            let riskClass = 'risk-low';
+            let riskText = 'Low Risk';
+            let frpVal = (Math.random() * 50 + 10).toFixed(1) + ' MW';
+
+            if (riskScore > 45) {
+                riskClass = 'risk-high';
+                riskText = 'High Risk';
+                frpVal = (Math.random() * 300 + 200).toFixed(1) + ' MW';
+            } else if (riskScore > 25) {
+                riskClass = 'risk-mod';
+                riskText = 'Moderate';
+                frpVal = (Math.random() * 150 + 50).toFixed(1) + ' MW';
+            }
+
+            const cell = document.createElement('div');
+            cell.className = `grid-cell ${riskClass}`;
+            cell.innerHTML = `
+                <div class="cell-title">${region}</div>
+                <div class="cell-risk">${riskText}</div>
+                <div class="cell-frp">FRP: ${frpVal}</div>
+            `;
+            gridContainer.appendChild(cell);
+        });
+    }
+
+    // Initialize on load
+    window.onload = () => {
+        updateSimulation();
+    };
+</script>
+
+</body>
+</html>
