@@ -118,8 +118,10 @@ To make concurrent work painless, use a shared **GitHub repository** or Google C
 ## Report Visualizer
 
 See `mock-visualizer.html` for a brief demo. 
+![Screenshot of a mockup visualizer dashboard](mockup-visualizer-dashboard.png)
 
 Additional things to plug in for novelty points include:
   - Feature Importance Bar Chart: Add a simple horizontal bar chart showing what features drove the prediction most (e.g., 7-day rolling temperature vs. soil moisture vs. wind speed), tying directly into Chapter 4 & 7 feature selection discussions.
   - Model Toggle Switch: Let the user toggle between Logistic Regression and Gradient Boosting on the UI to see how the "predictions" change or become more nuanced.
   - Confusion Matrix Preview: Add a small visual 2x2 grid representing True Positives, False Positives, etc., to visually explain your Precision/Recall tradeoffs to a non-technical audience.
+
